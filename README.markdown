@@ -1,7 +1,7 @@
 JobFu - Simple Asynchronous Processing
 ======================================
 
-Simple Asynchronous Processing solution uses a database as a backend queue. There are plenty of plugins for off loading expense tasks to background workers, this one is similar to delayed_job but simpler. I was about to replace this solution to delayed_job because I needed the priority feature, but realized that it would take less effort to implement priority to my existing solution. I also added the possibility to send email to the background queue very easy.
+Simple Asynchronous Processing solution that uses the database as queue. There are plenty of plugins for off loading expense tasks to background workers, and this one is similar to delayed_job but simpler implementation. I was about to replace this solution with delayed_job because I needed the priority feature, but realized that it would take less effort to implement priority in to this project. I also added the possibility to send emails through the background workers.
 
 Features
 ========
@@ -18,7 +18,7 @@ First install the plugin
 		
     ruby script/plugin install git://github.com/jnstq/job_fu.git
 
-Create the table for background jobs
+Create the table migration for background jobs
 
     ruby script/generate migration create_jobs
     
@@ -51,7 +51,7 @@ A background task is something that respond to process!
       end
     end
 
-    # Using standard interface
+    # Using standard interface, add also aliased to enqueue
     JobFu::Job.add(RemoteUpdater.new)
     
     class RemoteUpdater < ActiveRecord::BAse
@@ -83,7 +83,7 @@ The BackgroundMailer will enable call for
 
     Mailer.asynch_deliver_signup_notification(@user)
 
-This will create a new mail, then use ProcessableMethod to wrap call for Mailer.deliver(mail), this is then added to the background queue. We are creating the mail in the normal thread of the applicaiton to be able to read virutal attributes as, for example, a password. Otherwise this information wouldn't be avalible the next time it's fetched form the database.
+This will create a new mail, and use ProcessableMethod to wrap call for Mailer.deliver(mail). We are creating the mail in the main process of the applicaiton to be able to read virutal attributes as, for example, a password. Otherwise this information wouldn't be avalible the next time it's fetched form the database.
 
 Se the specs for more examples
 
