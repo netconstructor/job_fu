@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+require "rubygems"
+require "daemons"
+require "pathname"
+
+options = {
+  :app_name   => 'job',
+  :dir_mode   => :normal,
+  :dir        => Pathname.new(__FILE__).dirname.join('..', '..' , '..', '..', 'log').expand_path,
+  :multiple   => false,
+  :backtrace  => true,
+  :monitor    => false,
+  :log_output => false  
+}
+
+Daemons.run Pathname.new(__FILE__).dirname.join('..', 'lib', 'daemon.rb'), options
