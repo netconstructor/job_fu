@@ -52,10 +52,10 @@ A background task is something that respond to process!
     end
 
     # Using standard interface
-    Job.add(RemoteUpdater.new)
+    JobFu::Job.add(RemoteUpdater.new)
     
     class RemoteUpdater < ActiveRecord::BAse
-      include AsynchInvokeMethod
+      include JobFu::AsynchInvokeMethod
       def fetch_lat_and_long_for(user)
         # perform lookup
       end
@@ -67,7 +67,7 @@ A background task is something that respond to process!
     remote_updater.asynch_fetch_lat_and_long_for(@user)
 
 
-AsynchInvokeMethod will create a ProcessableMethod wrapper to invoke the method with the given args later on. ActiveRecord::Base objects will be serilized as "AR:{ClassName}:{ID}". Fresh ActiveRecord object will be fetched before the method is executed. The same serialization is used for method arguments.
+AsynchInvokeMethod will create a ProcessableMethod wrapper to invoke the method with the given args later on. ActiveRecord::Base objects will be serialized as "AR:{ClassName}:{ID}". A fresh ActiveRecord object will be fetched before the method is executed. The same serialization is used for method arguments.
 
     class Mailer < ActiveMailer::Base
       include JobFu::BackgroundMailer
@@ -84,6 +84,8 @@ The BackgroundMailer will enable call for
     Mailer.asynch_deliver_signup_notification(@user)
 
 This will create a new mail, then use ProcessableMethod to wrap call for Mailer.deliver(mail), this is then added to the background queue. We are creating the mail in the normal thread of the applicaiton to be able to read virutal attributes as, for example, a password. Otherwise this information wouldn't be avalible the next time it's fetched form the database.
+
+Se the specs for more examples
 
 
 Copyright (c) 2009 Jon Stenqvist, released under the MIT license

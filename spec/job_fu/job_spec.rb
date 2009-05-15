@@ -136,6 +136,13 @@ describe Job do
     Job.last.process!    
   end
   
+  it "should alias add to enqueue processable object" do
+    lambda {    
+      Job.enqueue new_daemon_mailer
+    }.should change { Job.count }.by(1)
+    Job.last.process!    
+  end
+  
   it "should process enqueued object" do
     DaemonMailer.any_instance.expects(:process!)
     Job.add new_daemon_mailer
