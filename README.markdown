@@ -18,11 +18,11 @@ First install the plugin
 		
     ruby script/plugin install git://github.com/jnstq/job_fu.git
 
-Create the table migration for background jobs
+Create the table migration and the background job dameon with
 
-    ruby script/generate migration create_jobs
+    ruby script/generate job_fu
     
-Paste in the migration
+This will generate the migration
 
     create_table :jobs do |t|
       t.column :priority,           :integer, :default => 0
@@ -32,13 +32,32 @@ Paste in the migration
       t.column :processed_at,       :datetime
     end
     
+Run the rake db:migrate
+
+    rake db:migrate
     
 Controll the background worker with start/stop/status
 
-    ruby vender/plugins/job_fu/bin/job_ctl start
-    
+    ruby script/job_ctl start
+    ruby script/job_ctl stop
+    ruby script/job_ctl status
+        
+If you want to set a different Rails environment then production, use
 
-Jobs that are processed successfully will be deleted.
+    RAILS_ENV=development ruby script/job_ctl start    
+
+Include the JobFu::AsynchInvokeMethod in normal classes and JobFu::BackgroundMailer for classes derived from ActiveMailer::Base. It will enable you to call all methods with async-syntax
+
+    class Foo
+      include JobFu::AsynchInvokeMethod   
+      def bar(arg1, arg2)
+      edn
+    end
+
+    foo.asynch_bar(this, arguments)
+    or 
+    foo.async_bar(this, arguments)
+   
 
 Example
 =======
@@ -52,7 +71,8 @@ A background task is something that respond to process!
     end
 
     # Using standard interface, add also aliased to enqueue
-    JobFu::Job.add(RemoteUpdater.new)
+    priority = 4
+    JobFu::Job.add RemoteUpdater.new, priority
     
     class RemoteUpdater < ActiveRecord::BAse
       include JobFu::AsynchInvokeMethod
@@ -85,7 +105,42 @@ The BackgroundMailer will enable call for
 
 This will create a new mail, and use ProcessableMethod to wrap call for Mailer.deliver(mail). We are creating the mail in the main process of the applicaiton to be able to read virutal attributes as, for example, a password. Otherwise this information wouldn't be avalible the next time it's fetched form the database.
 
+Jobs that are processed successfully will be deleted.
+
 Se the specs for more examples
 
+Production
+==========
+
+Monit
+-----
+
+Example monit script to ensure that job_daemon is always running.
+
+    check process job_daemon with pidfile /path/to/your/webapp/log/job.pid
+    start program = "/path/to/your/webapp/script/job_ctl start" as uid deploy and gid deploy
+    stop program = "/path/to/your/webapp/script/job_ctl stop"
+    if totalmem is greater than 120.0 MB for 4 cycles then restart
+    if cpu is greater than 90% for 8 cycles then restart
+    if 20 restarts within 20 cycles then timeout
+    group job_daemon
+
+Capistrano
+----------
+
+Stop and start job_daemon on deployment
+
+    set :job_daemon_monit_name, 'job_daemon'
+
+    namespace :job do
+      before 'deploy', 'deploy:job:stop'
+      task :stop do
+        sudo "/usr/local/bin/monit stop #{job_daemon_monit_name}"
+      end
+      after 'deploy', 'deploy:job:start'
+      task :start do
+        sudo "/usr/local/bin/monit start #{job_daemon_monit_name}"
+      end
+    end
 
 Copyright (c) 2009 Jon Stenqvist, released under the MIT license

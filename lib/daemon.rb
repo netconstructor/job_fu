@@ -5,6 +5,9 @@ ENV["RAILS_ENV"] ||= "production"
 
 require File.expand_path(File.dirname(__FILE__) + "/../../../../config/environment")
 
+Rails.logger.auto_flushing = true
+Rails.logger.info "=> Booting JobFu daemon in '#{Rails.env}' environment"
+
 $running = true
 Signal.trap("TERM") do
   $running = false

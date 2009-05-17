@@ -33,7 +33,7 @@ module JobFu
         processable.process!
       rescue Exception => e
         self.status = "failure"
-        self.status_description = "#{e.message} - #{e.backtrace.join("\n")}"
+        self.status_description = "n#{e.message} - #{e.backtrace.join("\n")}"
         save!
       else
         self.status = 'processed'
