@@ -3,7 +3,6 @@
 module JobFu
   class Job < ActiveRecord::Base
     include Serialization
-    named_scope :failures, :conditions => ["status = ?", 'failure']
     
     def self.next
       next_job = find(:first, :conditions => "status IS NULL", :order => 'priority DESC', :lock => true)
