@@ -14,6 +14,10 @@ Signal.trap("TERM") do
 end
 
 while($running) do
+  [ActiveRecord::Base].each do |klass|
+    klass.connection.verify!(15)
+  end
+  
   next_job = JobFu::Job.next
   unless next_job.blank?
     next_job.process!

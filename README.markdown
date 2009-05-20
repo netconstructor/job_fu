@@ -142,5 +142,15 @@ Stop and start job_daemon on deployment
         sudo "/usr/local/bin/monit start #{job_daemon_monit_name}"
       end
     end
+    
+Gotchas
+=======
+
+I have had problem with error "MySQL has gone away", even if the reconnet option is turend on in config/database.yml. The following code has been added to job-daemon to avoid it.
+
+    [ActiveRecord::Base].each do |klass|
+      klass.connection.verify!(15)
+    end
+    
 
 Copyright (c) 2009 Jon Stenqvist, released under the MIT license
