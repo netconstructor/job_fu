@@ -109,6 +109,31 @@ Jobs that are processed successfully will be deleted.
 
 Se the specs for more examples
 
+Backgrounded
+============
+
+JobFu is packaged with Backgrounded handler out of the box. read more on http://github.com/wireframe/backgrounded/tree/master. Basically it allow syntax as
+
+    #declaration
+    class User
+      backgrounded :do_stuff
+      def do_stuff
+        # do all your work here
+      end
+    end
+
+    #usage
+    user = User.new
+    user.do_stuff_backgrounded
+
+
+Configuration
+-------------
+
+    # rails config/initializers/backgrounded.rb
+    Backgrounded.handler = JobFu::Backgrounded::Handler.new
+
+
 Production
 ==========
 
