@@ -23,6 +23,7 @@ ActiveRecord::Migration.suppress_messages do
       t.column :status,             :string,  :limit => 20
       t.column :status_description, :string
       t.column :processable,        :text
+      t.column :process_at,         :datetime
       t.column :processed_at,       :datetime
     end
     create_table :remote_updaters do |t|

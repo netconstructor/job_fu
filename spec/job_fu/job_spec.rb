@@ -149,5 +149,34 @@ describe Job do
     Job.last.process!
   end
   
+  it "should not care if process at is not present" do
+    Job.add ProcessableClass, 0
+    Job.next.should_not be_nil
+  end
+
+  it "should not process jobs for the future" do
+    Job.add ProcessableClass, 0, 1.minute.from_now
+    Job.next.should be_nil
+  end
+  
+  it "should process jobs when the future is past" do
+    Job.add ProcessableClass, 0, 1.second.from_now
+    Job.stubs(:time_now => 2.seconds.from_now)
+    Job.next.should_not be_nil
+  end
+  
+  it "should force process for all" do
+    Job.add ProcessableClass, 0, 1.second.from_now
+    Job.all_force_process!
+  end
+  
+  it "should ignore if processable objects is deleted" do
+    remote_updater = RemoteUpdater.create
+    Job.add remote_updater
+    remote_updater.destroy
+    n = Job.next
+    n.process!.status.should == 'deleted'
+  end
+  
 
 end

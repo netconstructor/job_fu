@@ -6,6 +6,7 @@ class CreateJobs < ActiveRecord::Migration
       t.column :status,             :string,  :limit => 20
       t.column :status_description, :text
       t.column :processable,        :text
+      t.column :process_at,         :datetime
       t.column :processed_at,       :datetime
     end    
   end

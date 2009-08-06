@@ -3,20 +3,31 @@
 module JobFu
   class Job < ActiveRecord::Base
     include Serialization
+    named_scope :next_in_queue, lambda { 
+      { :conditions => ["(status IS NULL) AND (process_at IS NULL OR process_at  <= ?)", time_now], :order => 'priority DESC' }
+    }
     
     def self.next
-      next_job = find(:first, :conditions => "status IS NULL", :order => 'priority DESC', :lock => true)
+      next_job = next_in_queue.first(:lock => true)
       if next_job
         next_job.mark_in_process!
       end
       next_job
     end
     
-    def self.add(processable_object, priority = 0)
-      create!(:processable => processable_object, :priority => priority)
+    def self.all_force_process!
+      all(:order => 'priority DESC').each { |job| job.process! }
+    end
+
+    def self.add(processable_object, priority = 0, process_at = nil)
+      create!(:processable => processable_object, :priority => priority, :process_at => process_at)
     end
     class << self
       alias enqueue add
+    end
+    
+    def self.time_now
+      Time.new
     end
 
     def mark_in_process!
@@ -30,6 +41,9 @@ module JobFu
 
       begin
         processable.process!
+      rescue ActiveRecord::RecordNotFound
+        self.status = 'deleted'
+        delete
       rescue Exception => e
         self.status = "failure"
         self.status_description = "n#{e.message} - #{e.backtrace.join("\n")}"
