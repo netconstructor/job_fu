@@ -1,8 +1,8 @@
 module JobFu
   module Backgrounded
     class Handler
-      def request(object, method)
-        Job.enqueue ProcessableMethod.new(object, method)
+      def request(object, method, *args)
+        Job.enqueue ProcessableMethod.new(object, method, *args)
       end      
     end    
   end

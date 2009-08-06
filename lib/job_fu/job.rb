@@ -27,7 +27,7 @@ module JobFu
     end
     
     def self.time_now
-      Time.new
+      Time.now.utc
     end
 
     def mark_in_process!
