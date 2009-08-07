@@ -167,7 +167,7 @@ describe Job do
   
   it "should force process for all" do
     Job.add ProcessableClass, 0, 1.second.from_now
-    Job.all_force_process!
+    Job.force_process_all!
   end
   
   it "should ignore if processable objects is deleted" do

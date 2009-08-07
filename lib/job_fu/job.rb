@@ -15,7 +15,7 @@ module JobFu
       next_job
     end
     
-    def self.all_force_process!
+    def self.force_process_all!
       all(:order => 'priority DESC').each { |job| job.process! }
     end
 
