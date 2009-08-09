@@ -1,16 +1,4 @@
 #!/usr/bin/env ruby
-require "rubygems"
-require "daemons"
-require "pathname"
-
-options = {
-  :app_name   => 'job',
-  :dir_mode   => :normal,
-  :dir        => Pathname.new(__FILE__).dirname.join('..', 'log').expand_path,
-  :multiple   => false,
-  :backtrace  => true,
-  :monitor    => false,
-  :log_output => false  
-}
-
-Daemons.run Pathname.new(__FILE__).dirname.join('..', 'vendor', 'plugins', 'job_fu', 'lib', 'daemon.rb').expand_path, options
+puts "** Deprecated please use job_fu insted"
+require 'pathname'
+load Pathname.new(__FILE__).dirname.join('job_fu').expand_path

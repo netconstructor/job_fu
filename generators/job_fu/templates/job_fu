@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+require 'pathname'
+
+# You might want to change this
+ENV["RAILS_ENV"] ||= "production"
+
+
+RAILS_ROOT = Pathname.new(__FILE__).dirname.join('..').expand_path.to_s
+
+require Pathname.new(RAILS_ROOT).join('vendor', 'plugins', 'job_fu', 'lib', 'job_fu', 'daemon')
+
+JobFu::Daemon.new(:ARGS => ARGV).daemonize

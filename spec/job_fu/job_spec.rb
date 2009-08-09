@@ -18,11 +18,11 @@ module RSS
 end
 
 describe Job do
-  
+
   after(:each) do
-    Job.delete_all    
+    Job.delete_all
   end
-  
+
   def new_daemon_mailer
     DaemonMailer.new('somebody@internet.com', 'Subject of message', 'Message body')
   end
@@ -46,12 +46,12 @@ describe Job do
     Job.create(:processable => DaemonMailer.new('somebody@internet.com', 'Subject of message', 'Message body'))
     Job.last.processable.email.should eql('somebody@internet.com')
   end
-  
+
   it "should serialize class processable object" do
     @job = Job.new(:processable => ProcessableClass)
     @job.read_attribute(:processable).should eql("Class:ProcessableClass")
   end
-  
+
   it "should unserialize class processable object" do
     @job = Job.create(:processable => ProcessableClass)
     Job.last.processable == ProcessableClass
@@ -68,39 +68,39 @@ describe Job do
     Job.create(:processable => @remote_updater)
     Job.last.processable.should == @remote_updater
   end
-  
+
   it "should serialize and unserialize namespaced activerecord objects" do
     Job.create(:processable => RSS::Fetcher.create)
     Job.last.processable.class == RSS::Fetcher
   end
-  
+
   it "should find the next job" do
     @next = Job.create(:processable => DaemonMailer.new)
-    Job.create(:processable => RSS::Fetcher.create)    
+    Job.create(:processable => RSS::Fetcher.create)
     Job.next.should == @next
   end
-  
+
   it "should find the next job with priority in consideration" do
     Job.create(:processable => DaemonMailer.new, :priority => 1)
-    @next = Job.create(:processable => DaemonMailer.new, :priority => 5)    
-    Job.create(:processable => DaemonMailer.new, :priority => 3)    
+    @next = Job.create(:processable => DaemonMailer.new, :priority => 5)
+    Job.create(:processable => DaemonMailer.new, :priority => 3)
     Job.next.should == @next
   end
-  
+
   it "should mark in progress" do
     Job.create(:processable => DaemonMailer.new)
     lambda {
       Job.next
     }.should change { Job.last.status }.from(nil).to("in_progress")
   end
-  
+
   it "should mark in progress unless status" do
     job = Job.create(:processable => DaemonMailer.new, :status => nil)
     lambda {
       job.process!
     }.should change { job.status }.from(nil).to("processed")
   end
-  
+
   it "should execute process! for processable and mark as processed" do
     processable = DaemonMailer.new
     processable.expects(:process!).once.returns(true)
@@ -108,47 +108,47 @@ describe Job do
     job.process!
     job.status.should eql("processed")
   end
-  
-  it "should mark as failure on exceptions" do    
+
+  it "should mark as failure on exceptions" do
     job = Job.create(:processable => DaemonMailer.new, :status => "in_progress")
     job.processable.expects(:process!).once.raises
     job.process!
-    job.status.should eql('failure')    
+    job.status.should eql('failure')
   end
-  
+
   it "should not delete on job failure" do
     job = Job.create(:processable => DaemonMailer.new, :status => "in_progress")
     job.processable.expects(:process!).once.raises
-    lambda { job.process! }.should_not change { Job.count }    
+    lambda { job.process! }.should_not change { Job.count }
   end
-  
+
   it "should be deleted after successfully processed job" do
     job = Job.create(:processable => DaemonMailer.new, :status => "in_progress")
     lambda {
       job.process!
     }.should change { Job.count }.by(-1)
   end
-  
+
   it "should enqueue processable object" do
-    lambda {    
+    lambda {
       Job.add new_daemon_mailer
     }.should change { Job.count }.by(1)
-    Job.last.process!    
+    Job.last.process!
   end
-  
+
   it "should alias add to enqueue processable object" do
-    lambda {    
+    lambda {
       Job.enqueue new_daemon_mailer
     }.should change { Job.count }.by(1)
-    Job.last.process!    
+    Job.last.process!
   end
-  
+
   it "should process enqueued object" do
     DaemonMailer.any_instance.expects(:process!)
     Job.add new_daemon_mailer
     Job.last.process!
   end
-  
+
   it "should not care if process at is not present" do
     Job.add ProcessableClass, 0
     Job.next.should_not be_nil
@@ -158,18 +158,18 @@ describe Job do
     Job.add ProcessableClass, 0, 1.minute.from_now
     Job.next.should be_nil
   end
-  
+
   it "should process jobs when the future is past" do
     Job.add ProcessableClass, 0, 1.second.from_now
     Job.stubs(:time_now => 2.seconds.from_now)
     Job.next.should_not be_nil
   end
-  
+
   it "should force process for all" do
     Job.add ProcessableClass, 0, 1.second.from_now
     Job.force_process_all!
   end
-  
+
   it "should ignore if processable objects is deleted" do
     remote_updater = RemoteUpdater.create
     Job.add remote_updater
@@ -177,6 +177,58 @@ describe Job do
     n = Job.next
     n.process!.status.should == 'deleted'
   end
-  
+
+  context "min/max priority" do
+
+    it "should max and min priorty set to nil by default" do
+      Job.should respond_to(:min_priority)
+      Job.should respond_to(:max_priority)
+    end
+    
+    it "should have priorities" do
+      Job.min_priority = 1
+      Job.should be_priority
+    end
+
+    it "should be able to set min and max" do
+      Job.min_priority = 1
+      Job.min_priority.should == 1
+
+      Job.max_priority = 2
+      Job.max_priority.should == 2
+    end
+
+    it "should not find job when outside min/max priority scope" do
+      Job.min_priority, Job.max_priority = 2, 5
+      Job.add ProcessableClass, 1
+      Job.next.should be_nil
+    end
+
+    it "should find job when inside scope" do
+      Job.min_priority, Job.max_priority = 2, 5
+      Job.add ProcessableClass, 5
+      Job.next.should be_present
+    end
+    
+    it "should not find job when outside scope" do
+      Job.min_priority = 1
+      Job.add ProcessableClass, 0
+      Job.next.should be_nil
+    end
+    
+    it "should not find job when outside scope" do
+      Job.max_priority = 1
+      Job.add ProcessableClass, 2
+      Job.next.should be_nil
+    end
+    
+    it "should find job when inside scope" do
+      Job.max_priority = 5
+      Job.add ProcessableClass, 2
+      Job.next.should be_present
+    end
+    
+  end
+
 
 end

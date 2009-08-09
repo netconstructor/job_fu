@@ -7,8 +7,16 @@ module JobFu
       { :conditions => ["(status IS NULL) AND (process_at IS NULL OR process_at  <= ?)", time_now], :order => 'priority DESC' }
     }
     
+    class << self
+      attr_accessor :min_priority, :max_priority
+    end
+    
     def self.next
-      next_job = next_in_queue.first(:lock => true)
+      next_job = next_in_queue
+      next_job = next_job.scoped(:conditions => ['priority <= ?', max_priority]) if max_priority
+      next_job = next_job.scoped(:conditions => ['priority >= ?', min_priority]) if min_priority
+      next_job = next_job.first(:lock => true)
+      
       if next_job
         next_job.mark_in_process!
       end
@@ -28,6 +36,10 @@ module JobFu
     
     def self.time_now
       Time.now.utc
+    end
+    
+    def self.priority?
+      min_priority || max_priority
     end
 
     def mark_in_process!

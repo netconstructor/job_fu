@@ -10,11 +10,16 @@ Features
 * Asynchronous deliver emails
 * Daemon background worker
 * Serialize ActiveRecord objects so they are re-fetched from database before processing
+* Setup workers and their priority scope in config/job_fu.yml
 
 Install
 =======
 
-First install the plugin
+Install the daemons gem, where the patch from Chris Kline's in applyed, it will "Making sure Ruby Daemons die" from http://blog.rapleaf.com/dev/?p=19.
+
+    sudo gem install FiXato-daemons --source http://gems.github.com    
+
+Then install the plugin
 		
     ruby script/plugin install git://github.com/jnstq/job_fu.git
 
@@ -38,13 +43,15 @@ Run the rake db:migrate
     
 Controll the background worker with start/stop/status
 
-    ruby script/job_ctl start
-    ruby script/job_ctl stop
-    ruby script/job_ctl status
+    ruby script/job_fu start
+    ruby script/job_fu stop
+    ruby script/job_fu status
         
 If you want to set a different Rails environment then production, use
 
-    RAILS_ENV=development ruby script/job_ctl start    
+    RAILS_ENV=development ruby script/job_fu start
+    
+If you have some problem to start the worker, add -t to run on top.   
 
 Include the JobFu::AsynchInvokeMethod in normal classes and JobFu::BackgroundMailer for classes derived from ActiveMailer::Base. It will enable you to call all methods with async-syntax
 

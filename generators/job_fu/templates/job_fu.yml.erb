@@ -1,0 +1,28 @@
+# Setup workers for the application
+
+development:
+  app_name: <%= app_name %>
+  force_kill_wait: 30
+  workers:
+  - name: job-fu-worker
+  #   Setup worker for specific priority levels 
+  #   priority:      
+  #     min: 3
+  #     max: 5
+  # - name: notification-worker
+  #   priority:      
+  #     min: 0
+  #     max: 2
+    
+      
+test:
+  app_name: <%= app_name %>
+  force_kill_wait: 30
+  workers:
+  - name: job-fu-worker
+            
+production:
+  app_name: <%= app_name %>
+  force_kill_wait: 30
+  workers:
+  - name: job-fu-worker
