@@ -19,6 +19,12 @@ Install the daemons gem, where the patch from Chris Kline's in applyed, it will 
 
     sudo gem install FiXato-daemons --source http://gems.github.com    
 
+Use can also add this line, to be explicit about the dependency
+
+    # In you environemnt.rb
+    config.gem 'FiXato-daemons', :lib => false, :source => 'http://gems.github.com'
+    
+
 Then install the plugin
 		
     ruby script/plugin install git://github.com/jnstq/job_fu.git
