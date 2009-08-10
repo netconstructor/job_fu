@@ -36,6 +36,7 @@ module JobFu
         JobFu::Job.max_priority = options['priority']['max'] if options['priority']['max']
         JobFu::Job.min_priority = options['priority']['min'] if options['priority']['min']
       end
+      sleep_time = options['sleep_time'] || 5
 
       Rails.logger.auto_flushing = true
       Rails.logger.info "=> Booting JobFu daemon in '#{Rails.env}' environment"
@@ -56,7 +57,7 @@ module JobFu
         unless next_job.blank?
           next_job.process!
         else
-          sleep 5
+          sleep sleep_time
         end
       end
 
