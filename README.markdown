@@ -40,6 +40,7 @@ This will generate the migration
       t.column :status,             :string,  :limit => 20
       t.column :status_description, :text
       t.column :processable,        :text
+      t.column :process_at,         :datetime
       t.column :processed_at,       :datetime
     end
     
@@ -155,9 +156,9 @@ Monit
 
 Example monit script to ensure that job_daemon is always running.
 
-    check process job_daemon with pidfile /path/to/your/webapp/log/job.pid
-    start program = "/usr/bin/ruby /path/to/your/webapp/script/job_ctl start" as uid deploy and gid deploy
-    stop program = "/usr/bin/ruby /path/to/your/webapp/script/job_ctl stop"
+    check process job_daemon with pidfile /path/to/your/webapp/tmp/pids/app-job-fu-worker.pid
+    start program = "/usr/bin/ruby /path/to/your/webapp/script/job_fu start" as uid deploy and gid deploy
+    stop program = "/usr/bin/ruby /path/to/your/webapp/script/job_fu stop"
     if totalmem is greater than 120.0 MB for 4 cycles then restart
     if cpu is greater than 90% for 8 cycles then restart
     if 20 restarts within 20 cycles then timeout
