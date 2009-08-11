@@ -48,6 +48,27 @@ Run the rake db:migrate
 
     rake db:migrate
     
+Open config/job_fu.yml to configure your workers for each environment.
+
+    ..
+    production:
+      app_name: my_application
+      force_kill_wait: 30
+      workers:
+      - name: file-importer
+        priority:
+          min: 6
+          max: 10
+      - name: standard-worker-one
+        priority:
+          min: 0
+          max: 5
+      - name: standard-worker-two
+        priority:
+          min: 5
+          max: 10
+    ..
+    
 Controll the background worker with start/stop/status
 
     ruby script/job_fu start
@@ -86,7 +107,7 @@ A background task is something that respond to process!
 
     # Using standard interface, add also aliased to enqueue
     priority = 4
-    JobFu::Job.add RemoteUpdater.new, priority
+    JobFu::Job.add RemoteUpdater.new, priority, 1.hour.from_now
     
     class RemoteUpdater < ActiveRecord::BAse
       include JobFu::AsynchInvokeMethod
