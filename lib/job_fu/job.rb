@@ -3,26 +3,26 @@
 module JobFu
   class Job < ActiveRecord::Base
     include Serialization
-    named_scope :next_in_queue, lambda { 
+    named_scope :next_in_queue, lambda {
       { :conditions => ["(status IS NULL) AND (process_at IS NULL OR process_at  <= ?)", time_now], :order => 'priority DESC' }
     }
-    
+
     class << self
       attr_accessor :min_priority, :max_priority
     end
-    
+
     def self.next
       next_job = next_in_queue
       next_job = next_job.scoped(:conditions => ['priority <= ?', max_priority]) if max_priority
       next_job = next_job.scoped(:conditions => ['priority >= ?', min_priority]) if min_priority
       next_job = next_job.first(:lock => true)
-      
+
       if next_job
         next_job.mark_in_process!
       end
       next_job
     end
-    
+
     def self.force_process_all!
       all(:order => 'priority DESC').each { |job| job.process! }
     end
@@ -33,11 +33,11 @@ module JobFu
     class << self
       alias enqueue add
     end
-    
+
     def self.time_now
       Time.now.utc
     end
-    
+
     def self.priority?
       min_priority || max_priority
     end
@@ -73,6 +73,8 @@ module JobFu
 
     def processable
       @_processable ||= object_from_string(self[:processable])
+    rescue ActiveRecord::RecordNotFound
+      nil
     end
 
   end
