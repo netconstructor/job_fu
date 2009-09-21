@@ -3,6 +3,7 @@
 development:
   app_name: <%= app_name %>
   force_kill_wait: 30
+  default_priority: 0
   workers:
   - name: job-fu-worker
   #   Setup worker for specific priority levels 
@@ -19,11 +20,13 @@ development:
 test:
   app_name: <%= app_name %>
   force_kill_wait: 30
+  default_priority: 0
   workers:
   - name: job-fu-worker
             
 production:
   app_name: <%= app_name %>
   force_kill_wait: 30
+  default_priority: 0
   workers:
   - name: job-fu-worker

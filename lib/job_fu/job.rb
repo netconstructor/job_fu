@@ -27,8 +27,8 @@ module JobFu
       all(:order => 'priority DESC').each { |job| job.process! }
     end
 
-    def self.add(processable_object, priority = 0, process_at = nil)
-      create!(:processable => processable_object, :priority => priority, :process_at => process_at)
+    def self.add(processable_object, priority = nil, process_at = nil)
+      create!(:processable => processable_object, :priority => priority || JobFu::Config['default_priority'], :process_at => process_at)
     end
     class << self
       alias enqueue add

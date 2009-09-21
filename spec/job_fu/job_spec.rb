@@ -18,6 +18,9 @@ module RSS
 end
 
 describe Job do
+  before do
+    JobFu::Config.stubs(:config_file_path).returns(Pathname.new(__FILE__).dirname.join('..', 'fixtures', 'job_fu_without_default_priority.yml').expand_path.to_s)
+  end
 
   after(:each) do
     Job.delete_all
@@ -185,7 +188,7 @@ describe Job do
       Job.should respond_to(:min_priority)
       Job.should respond_to(:max_priority)
     end
-    
+
     it "should have priorities" do
       Job.min_priority = 1
       Job.should be_priority
@@ -210,25 +213,25 @@ describe Job do
       Job.add ProcessableClass, 5
       Job.next.should be_present
     end
-    
+
     it "should not find job when outside scope" do
       Job.min_priority = 1
       Job.add ProcessableClass, 0
       Job.next.should be_nil
     end
-    
+
     it "should not find job when outside scope" do
       Job.max_priority = 1
       Job.add ProcessableClass, 2
       Job.next.should be_nil
     end
-    
+
     it "should find job when inside scope" do
       Job.max_priority = 5
       Job.add ProcessableClass, 2
       Job.next.should be_present
     end
-    
+
   end
 
 
