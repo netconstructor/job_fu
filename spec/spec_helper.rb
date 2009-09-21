@@ -38,6 +38,8 @@ class RemoteUpdater < ActiveRecord::Base
   def process!; end
 end
 
+JOB_FU_CONFIG_FILE = Pathname.new(__FILE__).dirname.join('fixtures', 'job_fu.yml').expand_path.to_s
+
 Spec::Runner.configure do |config|
   # config.use_transactional_fixtures = true
   # config.use_instantiated_fixtures  = false

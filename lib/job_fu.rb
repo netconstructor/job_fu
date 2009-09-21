@@ -7,4 +7,5 @@ module JobFu
   autoload :BackgroundMailer, 'job_fu/background_mailer'
   autoload :Job, 'job_fu/job'
   autoload :Backgrounded, 'job_fu/backgrounded'
+  autoload :Config, 'job_fu/config'
 end

@@ -9,12 +9,8 @@ module JobFu
     attr_reader :args
     attr_reader :config
 
-    def environment
-      ENV['RAILS_ENV'] || 'production'
-    end
-
     def initialize(options)
-      @config = options[:config] ||= YAML.load_file(Pathname.new(RAILS_ROOT).join('config', 'job_fu.yml'))[environment]
+      @config = options[:config] ||= JobFu::Config.new
       @args = options[:ARGV]
     end
 

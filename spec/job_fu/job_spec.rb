@@ -172,10 +172,11 @@ describe Job do
 
   it "should ignore if processable objects is deleted" do
     remote_updater = RemoteUpdater.create
+    RemoteUpdater.delete(remote_updater.id)
     Job.add remote_updater
-    remote_updater.destroy
     n = Job.next
-    n.process!.status.should == 'deleted'
+    n.process!
+    n.status.should == 'failure'
   end
 
   context "min/max priority" do

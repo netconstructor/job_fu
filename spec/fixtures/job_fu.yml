@@ -1,0 +1,6 @@
+test:
+  app_name: Testapp
+  force_kill_wait: 30
+  default_priority: 0
+  workers:
+  - name: job-fu-worker
