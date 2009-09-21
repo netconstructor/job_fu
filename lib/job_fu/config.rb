@@ -1,4 +1,6 @@
 require 'forwardable'
+require 'pathname'
+
 module JobFu
   class Config
     extend Forwardable

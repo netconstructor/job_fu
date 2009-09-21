@@ -2,6 +2,7 @@ require 'rubygems'
 require 'yaml'
 gem 'FiXato-daemons', '= 1.0.10.2'
 require 'daemons'
+require File.dirname(__FILE__) + '/config'
 
 module JobFu
 
