@@ -62,11 +62,11 @@ module CustomMatchers
     UnSerializeMatcher.new(expected)
   end 
   
-  Spec::Matchers.define :have_accessor do |attr_name|
-    match do |receiver|
-      receiver.respond_to?(:"#{attr_name}") && receiver.respond_to?(:"#{attr_name}=")
-    end
-  end
+ # Spec::Matchers.define :have_accessor do |attr_name|
+ #   match do |receiver|
+ #     receiver.respond_to?(:"#{attr_name}") && receiver.respond_to?(:"#{attr_name}=")
+ #   end
+ # end
   
 
 end

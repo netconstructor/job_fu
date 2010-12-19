@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../spec_helper'
+require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 require 'actionmailer'
 
 include JobFu
@@ -11,6 +11,7 @@ class Mailer < ActionMailer::Base
 end
 
 describe Serializer do
+  subject { Serializer.new }
   before { @remote_updater = RemoteUpdater.create }
   
   it { should serialize(Mailer).to('Class:Mailer') }

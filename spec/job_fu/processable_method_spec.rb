@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../spec_helper'
+require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 include JobFu
 
@@ -18,9 +18,6 @@ describe ProcessableMethod do
   specify { ProcessableMethod.included_modules.should include(Serialization) }  
   
   it { should respond_to(:process!) }
-  it { should have_accessor(:object) }
-  it { should have_accessor(:method_name) }
-  it { should have_accessor(:args) }
 
   context "initialize" do
     before do

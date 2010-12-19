@@ -16,14 +16,26 @@ module JobFu
     end
 
     def daemonize
-      config['workers'].each do |worker|
-        process_name = "#{config['app_name']}-#{worker['name']}"
-        Daemons.run_proc(process_name, :dir => Pathname.new(RAILS_ROOT).join('tmp', 'pids').to_s, :dir_mode => :normal, :force_kill_wait => @config['force_kill_wait'], :ARGV => @args) do
-          start(worker)
-        end
+      if args.size > 1
+        setup(worker_by!(args.pop))
+      else
+        config['workers'].each { |worker| setup(worker) }
       end
     end
-
+   
+    def setup(worker)
+      process_name = "#{config['app_name']}-#{worker['name']}"
+      Daemons.run_proc(process_name, :dir => Pathname.new(RAILS_ROOT).join('tmp', 'pids').to_s, :dir_mode => :normal, :force_kill_wait => @config['force_kill_wait'], :ARGV => [@args.first]) do
+        start(worker)
+      end
+    end
+    
+    def worker_by!(name)
+      worker = config['workers'].detect { |worker| worker['name'] == name }
+      raise "No worker named '#{name}' available" unless worker
+      worker
+    end
+   
     def start(options = {})
       Dir.chdir(RAILS_ROOT)
 

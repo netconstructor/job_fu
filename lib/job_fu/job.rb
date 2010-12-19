@@ -4,7 +4,7 @@ module JobFu
   class Job < ActiveRecord::Base
     include Serialization
     named_scope :next_in_queue, lambda {
-      { :conditions => ["(status IS NULL) AND (process_at IS NULL OR process_at  <= ?)", time_now], :order => 'priority DESC' }
+      { :conditions => ["(status IS NULL) AND (process_at IS NULL OR process_at  <= ?)", time_now], :order => 'priority DESC, id' }
     }
 
     class << self
@@ -24,7 +24,16 @@ module JobFu
     end
 
     def self.force_process_all!
-      all(:order => 'priority DESC').each { |job| job.process! }
+      loop do
+        next_job = ActiveRecord::Base.silence { 
+          first(:order => 'priority DESC, id', :conditions => 'status IS NULL')
+        }
+        if next_job
+          next_job.process!
+        else
+          break
+        end
+      end
     end
 
     def self.add(processable_object, priority = nil, process_at = nil)

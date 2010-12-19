@@ -3,7 +3,7 @@ require 'rubygems'
 require 'pathname'
 require 'activerecord'
 require 'spec/autorun'
-require 'shoulda/rspec'
+#require 'shoulda/rspec'
 require 'factory_girl'
 require File.dirname(__FILE__) + '/custom_matchers'
 
@@ -45,4 +45,7 @@ Spec::Runner.configure do |config|
   # config.use_instantiated_fixtures  = false
   config.include CustomMatchers
   config.mock_with :mocha
+  config.before do
+    JobFu::Config.stubs(:config_file_path).returns(JOB_FU_CONFIG_FILE)
+  end
 end

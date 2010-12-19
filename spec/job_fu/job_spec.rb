@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../spec_helper'
+require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 include JobFu
 
@@ -19,7 +19,7 @@ end
 
 describe Job do
   before do
-    JobFu::Config.stubs(:config_file_path).returns(Pathname.new(__FILE__).dirname.join('..', 'fixtures', 'job_fu_without_default_priority.yml').expand_path.to_s)
+    #JobFu::Config.stubs(:config_file_path).returns(Pathname.new(__FILE__).dirname.join('..', 'fixtures', 'job_fu_without_default_priority.yml').expand_path.to_s)
   end
 
   after(:each) do
@@ -29,8 +29,6 @@ describe Job do
   def new_daemon_mailer
     DaemonMailer.new('somebody@internet.com', 'Subject of message', 'Message body')
   end
-
-  it { should be_kind_of(ActiveRecord::Base) }
 
   it "should create a new record" do
     lambda { Job.create }.should change { Job.count }.by(1)

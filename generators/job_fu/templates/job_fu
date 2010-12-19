@@ -9,4 +9,4 @@ RAILS_ROOT = Pathname.new(__FILE__).dirname.join('..').expand_path.to_s
 
 require Pathname.new(RAILS_ROOT).join('vendor', 'plugins', 'job_fu', 'lib', 'job_fu', 'daemon')
 
-JobFu::Daemon.new(:ARGS => ARGV).daemonize
+JobFu::Daemon.new(:ARGV => ARGV).daemonize
