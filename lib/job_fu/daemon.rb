@@ -41,16 +41,12 @@ module JobFu
 
       require Pathname.new(RAILS_ROOT).join('config', 'environment')
 
-      if options['priority']
-        JobFu::Job.max_priority = options['priority']['max'] if options['priority']['max']
-        JobFu::Job.min_priority = options['priority']['min'] if options['priority']['min']
-      end
       sleep_time = options['sleep_time'] || 5
-
+      JobFu::Job.worker = options['name']
+      
       Rails.logger.auto_flushing = true
       Rails.logger.info "=> Booting JobFu daemon in '#{Rails.env}' environment"
-      Rails.logger.info "** JobFu Worker #{options['name'].inspect}"
-      Rails.logger.info "** Priority from #{JobFu::Job.min_priority} to #{JobFu::Job.max_priority}" if JobFu::Job.priority?
+      Rails.logger.info "** JobFu Worker #{JobFu::Job.worker.inspect}"
 
       $running = true
       Signal.trap("TERM") do

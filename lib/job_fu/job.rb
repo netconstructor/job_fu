@@ -4,18 +4,18 @@ module JobFu
   class Job < ActiveRecord::Base
     include Serialization
     named_scope :next_in_queue, lambda {
-      { :conditions => ["(status IS NULL) AND (process_at IS NULL OR process_at  <= ?)", time_now], :order => 'priority DESC, id' }
+      { 
+        :conditions => ["(status IS NULL) AND (process_at IS NULL OR process_at  <= ?) AND (worker IS NULL OR worker = ?)", time_now, worker.to_s], 
+        :order => 'priority DESC, id' 
+      }
     }
-
+    
     class << self
-      attr_accessor :min_priority, :max_priority
-    end
+      attr_accessor :worker
+    end    
 
     def self.next
-      next_job = next_in_queue
-      next_job = next_job.scoped(:conditions => ['priority <= ?', max_priority]) if max_priority
-      next_job = next_job.scoped(:conditions => ['priority >= ?', min_priority]) if min_priority
-      next_job = next_job.first(:lock => true)
+      next_job = next_in_queue.first(:lock => true)
 
       if next_job
         next_job.mark_in_process!
@@ -36,19 +36,15 @@ module JobFu
       end
     end
 
-    def self.add(processable_object, priority = nil, process_at = nil)
-      create!(:processable => processable_object, :priority => priority || JobFu::Config['default_priority'], :process_at => process_at)
+    def self.add(processable_object, priority = nil, process_at = nil, worker = nil)
+      create!(:processable => processable_object, :priority => priority, :process_at => process_at, :worker => worker)
     end
     class << self
       alias enqueue add
     end
-
+    
     def self.time_now
       Time.now.utc
-    end
-
-    def self.priority?
-      min_priority || max_priority
     end
 
     def mark_in_process!
@@ -73,6 +69,10 @@ module JobFu
         self.status = 'processed'
         delete
       end
+    end
+    
+    def worker=(value)
+      write_attribute(:worker, value.present? ? value : nil)
     end
 
     def processable=(job)

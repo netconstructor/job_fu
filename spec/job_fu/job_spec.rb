@@ -18,9 +18,6 @@ module RSS
 end
 
 describe Job do
-  before do
-    #JobFu::Config.stubs(:config_file_path).returns(Pathname.new(__FILE__).dirname.join('..', 'fixtures', 'job_fu_without_default_priority.yml').expand_path.to_s)
-  end
 
   after(:each) do
     Job.delete_all
@@ -179,58 +176,41 @@ describe Job do
     n.process!
     n.status.should == 'failure'
   end
-
-  context "min/max priority" do
-
-    it "should max and min priorty set to nil by default" do
-      Job.should respond_to(:min_priority)
-      Job.should respond_to(:max_priority)
+  
+  it "should work off in the order they come in" do
+    job1 = RemoteUpdater.create
+    job2 = RemoteUpdater.create
+    job3 = RemoteUpdater.create
+    
+    Job.add job1
+    Job.add job2
+    Job.add job3
+    
+    [job1, job2, job3].each do |j|
+      Job.next.processable.should == j
     end
-
-    it "should have priorities" do
-      Job.min_priority = 1
-      Job.should be_priority
-    end
-
-    it "should be able to set min and max" do
-      Job.min_priority = 1
-      Job.min_priority.should == 1
-
-      Job.max_priority = 2
-      Job.max_priority.should == 2
-    end
-
-    it "should not find job when outside min/max priority scope" do
-      Job.min_priority, Job.max_priority = 2, 5
-      Job.add ProcessableClass, 1
-      Job.next.should be_nil
-    end
-
-    it "should find job when inside scope" do
-      Job.min_priority, Job.max_priority = 2, 5
-      Job.add ProcessableClass, 5
-      Job.next.should be_present
-    end
-
-    it "should not find job when outside scope" do
-      Job.min_priority = 1
-      Job.add ProcessableClass, 0
-      Job.next.should be_nil
-    end
-
-    it "should not find job when outside scope" do
-      Job.max_priority = 1
-      Job.add ProcessableClass, 2
-      Job.next.should be_nil
-    end
-
-    it "should find job when inside scope" do
-      Job.max_priority = 5
-      Job.add ProcessableClass, 2
-      Job.next.should be_present
-    end
-
   end
-
+  
+  it "should not return jobs for other workers" do
+    JobFu::Job.worker = "job-fu-worker"
+    Job.add DaemonMailer.new, nil, nil, "some-other-worker"
+    Job.next.should be_nil
+  end
+  
+  it "should return jobs for the current worker or when no worker is set" do
+    JobFu::Job.worker = "job-fu-worker"
+    
+    job1 = RemoteUpdater.create
+    job2 = RemoteUpdater.create
+    job3 = RemoteUpdater.create
+    job4 = RemoteUpdater.create
+    
+    Job.add job1, nil, nil, "job-fu-worker"
+    Job.add job2, nil, nil, "some-other-worker"
+    Job.add job3, nil, nil, nil
+    Job.add job4, nil, nil, ""
+    
+    Job.next_in_queue.map(&:processable).should == [job1, job3, job4]
+  end
 
 end

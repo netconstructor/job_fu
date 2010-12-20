@@ -14,6 +14,7 @@ RAILS_ROOT = spec_dir.join('..').expand_path.to_s unless defined?(RAILS_ROOT)
 require 'job_fu'
 
 ActiveRecord::Base.establish_connection(:adapter => 'sqlite3', :database => ':memory:')
+# ActiveRecord::Base.logger = Logger.new('test.log')
 ActiveRecord::Migration.verbose = false
 
 ActiveRecord::Migration.suppress_messages do
@@ -21,6 +22,7 @@ ActiveRecord::Migration.suppress_messages do
     create_table :jobs do |t|
       t.column :priority,           :integer, :default => 0
       t.column :status,             :string,  :limit => 20
+      t.column :worker,             :string,  :limit => 20
       t.column :status_description, :string
       t.column :processable,        :text
       t.column :process_at,         :datetime
