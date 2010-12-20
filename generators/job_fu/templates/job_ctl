@@ -1,4 +1,0 @@
-#!/usr/bin/env ruby
-puts "** Deprecated please use job_fu insted"
-require 'pathname'
-load Pathname.new(__FILE__).dirname.join('job_fu').expand_path
